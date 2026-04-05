@@ -1,6 +1,6 @@
 # SpeechText
 
-A menu-bar macOS app that lets you dictate text anywhere by holding the **fn** key. Runs entirely locally using [WhisperKit](https://github.com/argmaxinc/whisperkit) — no cloud APIs.
+A menu-bar macOS app that lets you dictate text anywhere by holding the right **Option (⌥)** key. Runs entirely locally using [WhisperKit](https://github.com/argmaxinc/whisperkit) — no cloud APIs.
 
 ## Requirements
 
@@ -28,14 +28,14 @@ A menu-bar macOS app that lets you dictate text anywhere by holding the **fn** k
 
 ## Usage
 
-- **Press and hold** the `fn` key (globe key) to start recording.
+- **Press and hold** the right **Option (⌥)** key to start recording.
 - **Speak** into your microphone.
 - **Release** the key to stop recording and transcribe.
 - The text is automatically pasted into the active text field.
 
 ## Architecture
 
-- **GlobalKeyListenerService** — CGEventTap detecting fn key press/release
+- **GlobalKeyListenerService** — NSEvent global monitor for right Option key
 - **AudioRecorderService** — AVAudioEngine recording to in-memory PCM buffers
 - **TranscriberService** — WhisperKit for local speech-to-text
 - **TextInjectorService** — NSPasteboard + CGEvent Cmd+V for text insertion
