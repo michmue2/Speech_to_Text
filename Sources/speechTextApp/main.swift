@@ -33,10 +33,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         keyListener = GlobalKeyListenerService()
-        keyListener.onKeyDown = { [weak self] in
+        keyListener.onDown = { [weak self] in
             Task { await self?.handleKeyDown() }
         }
-        keyListener.onKeyUp = { [weak self] in
+        keyListener.onUp = { [weak self] in
             Task { await self?.handleKeyUp() }
         }
         keyListener.start()

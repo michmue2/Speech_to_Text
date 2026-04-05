@@ -1,76 +1,51 @@
-import ApplicationServices
+import AppKit
+import Carbon.HIToolbox
 
-@MainActor
 class GlobalKeyListenerService: ObservableObject {
-    private var eventTap: CFMachPort?
-    private var runLoopSource: CFRunLoopSource?
+    var onDown: (() -> Void)?
+    var onUp: (() -> Void)?
 
-    /// The fn key code on macOS (63 = 0x3F)
-    private let fnKeyCode: CGKeyCode = 63
+    /// Right option key code (kVK_RightOption = 0x3D)
+    private static let rightOptionKeyCode: UInt16 = 0x3D
 
-    /// Callbacks set by the app
-    var onKeyDown: (() -> Void)?
-    var onKeyUp: (() -> Void)?
-
-    private var isFnPressed = false
+    private var isPressed = false
+    private var monitors: [Any] = []
 
     func start() {
-        let eventMask: CGEventMask = (1 << CGEventType.flagsChanged.rawValue)
-
-        eventTap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: CGEventMask(eventMask),
-            callback: { (proxy, type, event, refcon) -> Unmanaged<CGEvent>? in
-                guard let refcon = refcon else { return Unmanaged.passRetained(event) }
-                let listener = Unmanaged<GlobalKeyListenerService>.fromOpaque(refcon).takeUnretainedValue()
-
-                if type == .flagsChanged {
-                    listener.handleFlagsChanged(event)
-                }
-
-                return Unmanaged.passRetained(event)
-            },
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        )
-
-        guard let eventTap = eventTap else {
-            print("[KeyListener] Failed to create event tap. Check accessibility permissions.")
-            return
+        NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
+            self?.handleKeyEvent(event)
         }
 
-        runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-        print("[KeyListener] Event tap created, listening for fn key")
+        // Also monitor flagsChanged for modifier key state
+        NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged]) { [weak self] event in
+            self?.handleFlagsChanged(event)
+        }
+
+        print("[KeyListener] Global monitors active, watching right option key")
     }
 
-    private func handleFlagsChanged(_ event: CGEvent) {
-        // Get the key code from the event
-        let keyCode = CGKeyCode(event.getIntegerValueField(.keyboardEventKeycode))
-        let eventFlags = event.flags.rawValue
-
-        if keyCode == fnKeyCode {
-            let secondaryFn = (eventFlags & 0x00800000) != 0
-
-            if secondaryFn && !isFnPressed {
-                isFnPressed = true
-                onKeyDown?()
-            } else if !secondaryFn && isFnPressed {
-                isFnPressed = false
-                onKeyUp?()
+    private func handleKeyEvent(_ event: NSEvent) {
+        if event.keyCode == Self.rightOptionKeyCode {
+            if event.type == .keyDown && !isPressed {
+                isPressed = true
+                onDown?()
+            } else if event.type == .keyUp && isPressed {
+                isPressed = false
+                onUp?()
             }
         }
     }
 
-    func stop() {
-        if let eventTap = eventTap {
-            CGEvent.tapEnable(tap: eventTap, enable: false)
+    private func handleFlagsChanged(_ event: NSEvent) {
+        let flags = event.modifierFlags
+        let hasOption = flags.contains(.option)
+
+        if hasOption && !isPressed {
+            isPressed = true
+            onDown?()
+        } else if !hasOption && isPressed {
+            isPressed = false
+            onUp?()
         }
-        if let source = runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
-        }
-        eventTap = nil
-        runLoopSource = nil
     }
 }

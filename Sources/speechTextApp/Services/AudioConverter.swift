@@ -4,27 +4,33 @@ import AVFoundation
 extension AudioRecorderService {
     /// Write PCM buffer to WAV file at the given URL
     static func writeBufferToWAV(_ buffer: AVAudioPCMBuffer, to url: URL) throws {
-        let audioFile = try AVAudioFile(
-            forWriting: url,
-            settings: [
-                AVFormatIDKey: kAudioFormatLinearPCM,
-                AVLinearPCMBitDepthKey: 16,
-                AVLinearPCMIsFloatKey: false,
-                AVLinearPCMIsBigEndianKey: false,
-                AVSampleRateKey: buffer.format.sampleRate,
-                AVNumberOfChannelsKey: buffer.format.channelCount,
-            ]
-        )
+        // Ensure format matches what AVAudioFile expects
+        let targetFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32,
+                                          sampleRate: 16000.0,
+                                          channels: 1,
+                                          interleaved: false)!
+        let fileSettings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatLinearPCM),
+            AVSampleRateKey: 16000.0,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 32,
+            AVLinearPCMIsFloatKey: true,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsNonInterleaved: !targetFormat.isInterleaved,
+        ]
 
-        // If buffer format doesn't match, convert
-        if buffer.format.commonFormat != .pcmFormatInt16 {
-            let targetFormat = AVAudioFormat(commonFormat: .pcmFormatInt16,
-                                              sampleRate: buffer.format.sampleRate,
-                                              channels: buffer.format.channelCount,
-                                              interleaved: true)!
+        // Delete existing file if any
+        try? FileManager.default.removeItem(at: url)
+
+        let audioFile = try AVAudioFile(forWriting: url, settings: fileSettings)
+
+        // Convert to target format if needed
+        if buffer.format.commonFormat != .pcmFormatFloat32 ||
+           buffer.format.sampleRate != 16000.0 ||
+           buffer.format.channelCount != 1 {
             let converter = AVAudioConverter(from: buffer.format, to: targetFormat)!
             let convertedBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat,
-                                                   frameCapacity: buffer.frameCapacity)!
+                                                   frameCapacity: buffer.frameCapacity * 2)!
             var error: NSError?
             converter.convert(to: convertedBuffer, error: &error) { _, outStatus in
                 outStatus.pointee = .haveData
