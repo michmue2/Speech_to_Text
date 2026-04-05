@@ -7,12 +7,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var keyListener: GlobalKeyListenerService!
     var audioRecorder: AudioRecorderService!
     var transcriber: TranscriberService!
+    var historyStore: HistoryStore!
+    var historyWindow: HistoryWindow?
     let textInjector = TextInjectorService()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         appState = AppState()
         audioRecorder = AudioRecorderService()
         transcriber = TranscriberService()
+        historyStore = HistoryStore()
 
         NSApp.setActivationPolicy(.accessory)
 
@@ -73,6 +76,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 statusItem.button?.title = "🎙"
                 return
             }
+            // Save to history
+            historyStore.addEntry(transcript)
+            // Inject text
             textInjector.inject(transcript)
             appState.state = .idle
             statusItem.button?.title = "🎙"
@@ -84,28 +90,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func buildMenu() -> NSMenu {
+    func buildMenu() -> NSMenu {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Active", action: nil, keyEquivalent: ""))
         menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: "History", action: #selector(showHistory), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "About", action: #selector(showAbout), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
         return menu
     }
 
-    @objc private func showAbout() {
+    @objc func showHistory() {
+        if let historyWindow = historyWindow, historyWindow.isVisible {
+            historyWindow.close()
+        } else {
+            if self.historyWindow == nil {
+                self.historyWindow = HistoryWindow(store: historyStore)
+            }
+            self.historyWindow?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+    }
+
+    @objc func showAbout() {
         let alert = NSAlert()
         alert.messageText = "SpeechText"
-        alert.informativeText = "Dictate anywhere with the fn key.\nRuns locally with WhisperKit."
+        alert.informativeText = "Dictate with the right Option (⌥) key.\nRuns locally with WhisperKit."
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }
 
-    @objc private func quit() {
+    @objc func quit() {
         NSApplication.shared.terminate(nil)
     }
 
-    @MainActor private func showModelLoadError() {
+    @MainActor func showModelLoadError() {
         let alert = NSAlert()
         alert.messageText = "SpeechText"
         alert.informativeText = "Failed to load WhisperKit model. Check your internet connection and try again."
@@ -113,7 +132,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.runModal()
     }
 
-    private func showNotification(title: String, message: String) {
+    func showNotification(title: String, message: String) {
         let notification = NSUserNotification()
         notification.title = title
         notification.informativeText = message
