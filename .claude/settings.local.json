@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "WebSearch",
+      "Bash(swift build:*)",
+      "Bash(swift:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
