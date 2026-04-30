@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/_CryptoExtras.build/primary.swiftdeps"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/checkouts/swift-crypto/Sources/_CryptoExtras/Exports.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/_CryptoExtras.build/Exports.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/_CryptoExtras.build/Exports.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/_CryptoExtras.build/Exports~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/_CryptoExtras.build/Exports.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/_CryptoExtras.build/Exports.dia"
+  }
+}

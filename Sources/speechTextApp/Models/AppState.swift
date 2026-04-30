@@ -4,6 +4,7 @@ enum AppRecordingState: String {
     case idle
     case recording
     case processing
+    case loadingModel
 }
 
 @MainActor
@@ -15,6 +16,7 @@ class AppState: ObservableObject {
         case .idle: return "🎙"
         case .recording: return "●"
         case .processing: return "⏳"
+        case .loadingModel: return "⏳"
         }
     }
 }

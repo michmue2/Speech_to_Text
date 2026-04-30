@@ -1,0 +1,4 @@
+module yyjson {
+    umbrella header "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/checkouts/yyjson/src/yyjson.h"
+    export *
+}

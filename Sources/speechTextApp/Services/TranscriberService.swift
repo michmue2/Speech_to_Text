@@ -4,19 +4,40 @@ import AVFoundation
 
 actor TranscriberService {
     private var whisperKit: WhisperKit?
-    private var modelLoaded: Bool = false
-    private var warmingUp: Bool = false
+    private var activeModel: SpeechTextModel?
 
-    /// Initialize WhisperKit: downloads model if needed, then fully loads it
+    /// Initialize WhisperKit with the saved model choice.
     func initialize() async throws {
-        guard !modelLoaded && !warmingUp else { return }
-        warmingUp = true
+        try await switchModel(to: .saved)
+    }
 
-        let config = WhisperKitConfig(model: "tiny", verbose: false, logLevel: .none, useBackgroundDownloadSession: false)
+    /// Switch to a single active WhisperKit model, unloading the previous pipeline first.
+    func switchModel(to model: SpeechTextModel) async throws {
+        guard activeModel != model || whisperKit == nil else { return }
+
+        await unloadCurrentModel()
+
+        let config = WhisperKitConfig(
+            model: model.whisperKitModelName,
+            verbose: false,
+            logLevel: .none,
+            load: true,
+            useBackgroundDownloadSession: false
+        )
         whisperKit = try await WhisperKit(config)
-        modelLoaded = true
-        warmingUp = false
-        NSLog("[TranscriberService] Model loaded and ready")
+        activeModel = model
+        NSLog("[TranscriberService] \(model.displayName) loaded and ready")
+    }
+
+    func unloadCurrentModel() async {
+        guard let whisperKit else {
+            activeModel = nil
+            return
+        }
+
+        await whisperKit.unloadModels()
+        self.whisperKit = nil
+        activeModel = nil
     }
 
     /// Transcribe a file path to text. Returns nil if model not loaded or no speech detected.
@@ -24,7 +45,8 @@ actor TranscriberService {
         guard let whisperKit = whisperKit else { return nil }
 
         do {
-            let result = try await whisperKit.transcribe(audioPath: path, callback: nil)
+            let options = DecodingOptions(language: "en", detectLanguage: false)
+            let result = try await whisperKit.transcribe(audioPath: path, decodeOptions: options, callback: nil)
             return result.first?.text
         } catch {
             print("[TranscriberService] Transcription failed: \(error)")

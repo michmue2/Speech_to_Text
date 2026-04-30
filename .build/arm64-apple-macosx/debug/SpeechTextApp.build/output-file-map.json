@@ -1,0 +1,75 @@
+{
+  "": {
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/primary.swiftdeps"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Models/AppState.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AppState.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AppState.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AppState~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AppState.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AppState.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Models/HistoryStore.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryStore.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryStore.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryStore.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryStore.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Models/SpeechTextModel.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/SpeechTextModel.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/SpeechTextModel.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/SpeechTextModel~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/SpeechTextModel.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/SpeechTextModel.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/AudioConverter.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioConverter.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioConverter.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioConverter~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioConverter.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioConverter.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/AudioRecorderService.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioRecorderService.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioRecorderService.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioRecorderService~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioRecorderService.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/AudioRecorderService.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/GlobalKeyListenerService.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/GlobalKeyListenerService.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/GlobalKeyListenerService.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/GlobalKeyListenerService~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/GlobalKeyListenerService.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/GlobalKeyListenerService.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TextInjectorService.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TextInjectorService.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TextInjectorService.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TextInjectorService~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TextInjectorService.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TextInjectorService.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriberService.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Views/HistoryWindow.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryWindow.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryWindow.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryWindow~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryWindow.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryWindow.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/main.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/main.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/main.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/main.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/main.dia"
+  }
+}

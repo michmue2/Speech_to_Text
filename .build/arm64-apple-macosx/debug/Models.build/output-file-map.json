@@ -1,0 +1,26 @@
+{
+  "": {
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/primary.swiftdeps"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/checkouts/swift-transformers/Sources/Models/LanguageModel.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModel.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModel.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModel~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModel.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModel.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/checkouts/swift-transformers/Sources/Models/LanguageModelTypes.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModelTypes.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModelTypes.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModelTypes~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModelTypes.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/LanguageModelTypes.dia"
+  },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/checkouts/swift-transformers/Sources/Models/Weights.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/Weights.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/Weights.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/Weights~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/Weights.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/Models.build/Weights.dia"
+  }
+}

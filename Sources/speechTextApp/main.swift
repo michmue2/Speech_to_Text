@@ -9,6 +9,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var transcriber: TranscriberService!
     var historyStore: HistoryStore!
     var historyWindow: HistoryWindow?
+    var selectedModel: SpeechTextModel = .saved
     let textInjector = TextInjectorService()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -20,19 +21,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.button?.title = "🎙"
+        updateStatusTitle()
         statusItem.menu = buildMenu()
 
         Task {
-            do {
-                try await transcriber.initialize()
-                NSLog("[App] WhisperKit initialized")
-            } catch {
-                NSLog("[App] Failed to initialize WhisperKit: \(error)")
-                DispatchQueue.main.async { [weak self] in
-                    self?.showModelLoadError()
-                }
-            }
+            await loadModel(selectedModel, restorePreviousOnFailure: false)
         }
 
         keyListener = GlobalKeyListenerService()
@@ -48,22 +41,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor func handleKeyDown() async {
         guard appState.state == .idle else { return }
         appState.state = .recording
-        statusItem.button?.title = "●"
+        updateStatusTitle()
         let started = await audioRecorder.start()
         if !started {
             appState.state = .idle
-            statusItem.button?.title = "🎙"
+            updateStatusTitle()
         }
     }
 
     @MainActor func handleKeyUp() async {
         guard appState.state == .recording else { return }
         appState.state = .processing
-        statusItem.button?.title = "⏳"
+        updateStatusTitle()
         let buffer = await audioRecorder.stop()
         guard let buffer = buffer else {
             appState.state = .idle
-            statusItem.button?.title = "🎙"
+            updateStatusTitle()
             return
         }
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("speechtext_recording.wav")
@@ -73,7 +66,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             try? FileManager.default.removeItem(at: tempURL)
             guard let transcript = transcript, !transcript.isEmpty else {
                 appState.state = .idle
-                statusItem.button?.title = "🎙"
+                updateStatusTitle()
                 return
             }
             // Save to history
@@ -81,23 +74,108 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Inject text
             textInjector.inject(transcript)
             appState.state = .idle
-            statusItem.button?.title = "🎙"
+            updateStatusTitle()
         } catch {
             NSLog("[App] WAV conversion failed: \(error)")
             showNotification(title: "SpeechText Error", message: "Failed to process audio recording.")
             appState.state = .idle
-            statusItem.button?.title = "🎙"
+            updateStatusTitle()
         }
     }
 
     func buildMenu() -> NSMenu {
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Active", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Active • \(selectedModel.displayName)", action: nil, keyEquivalent: ""))
+        menu.addItem(modelMenuItem())
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "History", action: #selector(showHistory), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "About", action: #selector(showAbout), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
         return menu
+    }
+
+    func modelMenuItem() -> NSMenuItem {
+        let item = NSMenuItem(title: "Model", action: nil, keyEquivalent: "")
+        let submenu = NSMenu()
+
+        for model in SpeechTextModel.allCases {
+            let modelItem = NSMenuItem(title: model.menuTitle, action: #selector(selectModel(_:)), keyEquivalent: "")
+            modelItem.target = self
+            modelItem.representedObject = model.rawValue
+            modelItem.state = model == selectedModel ? .on : .off
+            submenu.addItem(modelItem)
+        }
+
+        item.submenu = submenu
+        return item
+    }
+
+    @MainActor func updateStatusTitle() {
+        statusItem.button?.title = "\(appState.stateTitle) \(selectedModel.statusLabel)"
+    }
+
+    @MainActor func refreshMenu() {
+        statusItem.menu = buildMenu()
+    }
+
+    @MainActor func loadModel(_ model: SpeechTextModel, restorePreviousOnFailure: Bool) async {
+        guard appState.state == .idle || appState.state == .loadingModel else { return }
+
+        let previousModel = selectedModel
+        selectedModel = model
+        appState.state = .loadingModel
+        updateStatusTitle()
+        refreshMenu()
+
+        do {
+            try await transcriber.switchModel(to: model)
+            model.save()
+            appState.state = .idle
+            updateStatusTitle()
+            refreshMenu()
+            NSLog("[App] WhisperKit initialized with \(model.displayName)")
+        } catch {
+            NSLog("[App] Failed to initialize \(model.displayName): \(error)")
+            showModelLoadError(model: model)
+
+            guard restorePreviousOnFailure, previousModel != model else {
+                appState.state = .idle
+                updateStatusTitle()
+                refreshMenu()
+                return
+            }
+
+            selectedModel = previousModel
+            updateStatusTitle()
+            refreshMenu()
+
+            do {
+                try await transcriber.switchModel(to: previousModel)
+                previousModel.save()
+            } catch {
+                NSLog("[App] Failed to restore \(previousModel.displayName): \(error)")
+                showModelLoadError(model: previousModel)
+            }
+
+            appState.state = .idle
+            updateStatusTitle()
+            refreshMenu()
+        }
+    }
+
+    @MainActor @objc func selectModel(_ sender: NSMenuItem) {
+        guard
+            appState.state == .idle,
+            let rawValue = sender.representedObject as? String,
+            let model = SpeechTextModel(rawValue: rawValue),
+            model != selectedModel
+        else {
+            return
+        }
+
+        Task {
+            await loadModel(model, restorePreviousOnFailure: true)
+        }
     }
 
     @objc func showHistory() {
@@ -115,7 +193,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func showAbout() {
         let alert = NSAlert()
         alert.messageText = "SpeechText"
-        alert.informativeText = "Dictate with the right Option (⌥) key.\nRuns locally with WhisperKit."
+        alert.informativeText = "Dictate with the right Option (⌥) key.\nRuns locally with WhisperKit.\nCurrent model: \(selectedModel.displayName)"
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }
@@ -124,10 +202,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApplication.shared.terminate(nil)
     }
 
-    @MainActor func showModelLoadError() {
+    @MainActor func showModelLoadError(model: SpeechTextModel) {
         let alert = NSAlert()
         alert.messageText = "SpeechText"
-        alert.informativeText = "Failed to load WhisperKit model. Check your internet connection and try again."
+        alert.informativeText = "Failed to load \(model.displayName). Check your internet connection and try again."
         alert.addButton(withTitle: "OK")
         alert.runModal()
     }
