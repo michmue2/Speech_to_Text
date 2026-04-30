@@ -5,6 +5,7 @@ enum SpeechTextModel: String, CaseIterable, Sendable {
     case distilWhisperV3
 
     private static let defaultsKey = "SpeechText.SelectedModel"
+    private static let modelFolderPrefix = "SpeechText.ModelFolder."
 
     var displayName: String {
         switch self {
@@ -55,5 +56,24 @@ enum SpeechTextModel: String, CaseIterable, Sendable {
 
     func save() {
         UserDefaults.standard.set(rawValue, forKey: Self.defaultsKey)
+    }
+
+    var savedModelFolderPath: String? {
+        let key = Self.modelFolderPrefix + rawValue
+        guard let path = UserDefaults.standard.string(forKey: key) else {
+            return nil
+        }
+
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue else {
+            return nil
+        }
+
+        return path
+    }
+
+    func saveModelFolderPath(_ path: String) {
+        let key = Self.modelFolderPrefix + rawValue
+        UserDefaults.standard.set(path, forKey: key)
     }
 }

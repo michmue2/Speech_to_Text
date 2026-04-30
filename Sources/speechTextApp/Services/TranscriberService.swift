@@ -17,16 +17,35 @@ actor TranscriberService {
 
         await unloadCurrentModel()
 
+        do {
+            whisperKit = try await loadWhisperKit(for: model, usingCachedFolder: true)
+        } catch {
+            NSLog("[TranscriberService] Cached load failed for \(model.displayName): \(error)")
+            await unloadCurrentModel()
+            whisperKit = try await loadWhisperKit(for: model, usingCachedFolder: false)
+        }
+
+        if let modelFolder = whisperKit?.modelFolder?.path {
+            model.saveModelFolderPath(modelFolder)
+        }
+
+        activeModel = model
+        NSLog("[TranscriberService] \(model.displayName) loaded and ready")
+    }
+
+    private func loadWhisperKit(for model: SpeechTextModel, usingCachedFolder: Bool) async throws -> WhisperKit {
+        let modelFolder = usingCachedFolder ? model.savedModelFolderPath : nil
         let config = WhisperKitConfig(
-            model: model.whisperKitModelName,
+            model: modelFolder == nil ? model.whisperKitModelName : nil,
+            modelFolder: modelFolder,
             verbose: false,
             logLevel: .none,
             load: true,
+            download: modelFolder == nil,
             useBackgroundDownloadSession: false
         )
-        whisperKit = try await WhisperKit(config)
-        activeModel = model
-        NSLog("[TranscriberService] \(model.displayName) loaded and ready")
+
+        return try await WhisperKit(config)
     }
 
     func unloadCurrentModel() async {
