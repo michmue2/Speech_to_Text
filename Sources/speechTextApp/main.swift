@@ -53,18 +53,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard appState.state == .recording else { return }
         appState.state = .processing
         updateStatusTitle()
-        let buffer = await audioRecorder.stop()
-        guard let buffer = buffer else {
+        let chunks = await audioRecorder.stop()
+        guard !chunks.isEmpty else {
             appState.state = .idle
             updateStatusTitle()
             return
         }
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("speechtext_recording.wav")
+
         do {
-            try AudioRecorderService.writeBufferToWAV(buffer, to: tempURL)
-            let transcript = await transcriber.transcribeFile(path: tempURL.path)
-            try? FileManager.default.removeItem(at: tempURL)
-            guard let transcript = transcript, !transcript.isEmpty else {
+            var transcripts: [String] = []
+
+            for chunk in chunks.sorted(by: { $0.index < $1.index }) {
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("speechtext_recording_\(UUID().uuidString)_\(chunk.index).wav")
+                defer { try? FileManager.default.removeItem(at: tempURL) }
+                try AudioRecorderService.writeBufferToWAV(chunk.buffer, to: tempURL)
+                let transcript = await transcriber.transcribeFile(path: tempURL.path)
+
+                if let transcript, !transcript.isEmpty {
+                    transcripts.append(transcript)
+                }
+            }
+
+            let transcript = mergeTranscripts(transcripts)
+            guard !transcript.isEmpty else {
                 appState.state = .idle
                 updateStatusTitle()
                 return
@@ -81,6 +92,42 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             appState.state = .idle
             updateStatusTitle()
         }
+    }
+
+    func mergeTranscripts(_ transcripts: [String]) -> String {
+        var mergedWords: [String] = []
+
+        for transcript in transcripts {
+            let words = transcript.split(whereSeparator: { $0.isWhitespace }).map(String.init)
+            guard !words.isEmpty else { continue }
+
+            let overlap = overlapWordCount(existing: mergedWords, next: words)
+            mergedWords.append(contentsOf: words.dropFirst(overlap))
+        }
+
+        return mergedWords.joined(separator: " ")
+    }
+
+    func overlapWordCount(existing: [String], next: [String]) -> Int {
+        let maxOverlap = min(15, existing.count, next.count)
+        guard maxOverlap > 0 else { return 0 }
+
+        for count in stride(from: maxOverlap, through: 1, by: -1) {
+            let suffix = existing.suffix(count).map(normalizedWord)
+            let prefix = next.prefix(count).map(normalizedWord)
+            if suffix == prefix {
+                return count
+            }
+        }
+
+        return 0
+    }
+
+    func normalizedWord(_ word: String) -> String {
+        let scalars = word.lowercased().unicodeScalars.filter {
+            CharacterSet.alphanumerics.contains($0)
+        }
+        return String(String.UnicodeScalarView(scalars))
     }
 
     func buildMenu() -> NSMenu {

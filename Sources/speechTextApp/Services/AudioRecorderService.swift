@@ -1,18 +1,31 @@
 import Foundation
 import AVFoundation
+import AppKit
+
+struct AudioRecordingChunk {
+    let index: Int
+    let buffer: AVAudioPCMBuffer
+}
 
 actor AudioRecorderService {
     private var audioEngine: AVAudioEngine?
     private var collectedBuffers: [AVAudioPCMBuffer] = []
+    private var completedChunks: [AudioRecordingChunk] = []
     private var isRecording: Bool = false
-    private var maxDuration: TimeInterval = 30
-    private var recordingTimer: DispatchWorkItem?
+    private let chunkDuration: TimeInterval = 30
+    private let overlapDuration: TimeInterval = 1
+    private var chunkTimer: DispatchWorkItem?
+    private var nextChunkIndex: Int = 0
+    private var framesSinceLastChunk: AVAudioFramePosition = 0
 
     /// Start recording audio. Returns false if already recording.
     func start() async -> Bool {
         guard !isRecording else { return false }
         isRecording = true
         collectedBuffers.removeAll()
+        completedChunks.removeAll()
+        nextChunkIndex = 0
+        framesSinceLastChunk = 0
 
         let engine = AVAudioEngine()
         let input = engine.inputNode
@@ -57,12 +70,7 @@ actor AudioRecorderService {
 
         audioEngine = engine
 
-        // Auto-stop timer
-        let workItem = DispatchWorkItem {
-            Task { await actorRef.stop() }
-        }
-        recordingTimer = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + maxDuration, execute: workItem)
+        scheduleChunkTimer()
 
         return true
     }
@@ -73,21 +81,64 @@ actor AudioRecorderService {
     }
 
     private func doCollect(_ buffer: AVAudioPCMBuffer) {
+        guard isRecording else { return }
         collectedBuffers.append(buffer)
+        framesSinceLastChunk += AVAudioFramePosition(buffer.frameLength)
     }
 
-    /// Stop recording and return the combined buffer. Nil if not recording.
-    func stop() async -> AVAudioPCMBuffer? {
+    /// Stop recording and return all flushed chunks plus the final partial chunk.
+    func stop() async -> [AudioRecordingChunk] {
+        guard isRecording else { return [] }
         isRecording = false
-        recordingTimer?.cancel()
-        recordingTimer = nil
-        let buffers = collectedBuffers
-        let result = combineBuffers(buffers)
+        chunkTimer?.cancel()
+        chunkTimer = nil
+
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine = nil
+
+        if framesSinceLastChunk > 0, let finalBuffer = combineBuffers(collectedBuffers) {
+            completedChunks.append(AudioRecordingChunk(index: nextChunkIndex, buffer: finalBuffer))
+            nextChunkIndex += 1
+        }
+
+        let chunks = completedChunks
         collectedBuffers.removeAll()
-        return result
+        completedChunks.removeAll()
+        framesSinceLastChunk = 0
+        return chunks
+    }
+
+    private func scheduleChunkTimer() {
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            Task { await self.flushCurrentChunk() }
+        }
+        chunkTimer = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + chunkDuration, execute: workItem)
+    }
+
+    private func flushCurrentChunk() {
+        guard isRecording else { return }
+        defer { scheduleChunkTimer() }
+
+        guard framesSinceLastChunk > 0, let chunkBuffer = combineBuffers(collectedBuffers) else {
+            return
+        }
+
+        completedChunks.append(AudioRecordingChunk(index: nextChunkIndex, buffer: chunkBuffer))
+        nextChunkIndex += 1
+
+        if let overlapBuffer = tailBuffer(from: chunkBuffer, duration: overlapDuration) {
+            collectedBuffers = [overlapBuffer]
+        } else {
+            collectedBuffers.removeAll()
+        }
+        framesSinceLastChunk = 0
+
+        DispatchQueue.main.async {
+            NSSound.beep()
+        }
     }
 
     /// Combine multiple PCM buffers into a single buffer
@@ -114,5 +165,28 @@ actor AudioRecorderService {
         }
         combined.frameLength = AVAudioFrameCount(totalFrames)
         return combined
+    }
+
+    private func tailBuffer(from buffer: AVAudioPCMBuffer, duration: TimeInterval) -> AVAudioPCMBuffer? {
+        let framesToCopy = min(
+            Int(buffer.frameLength),
+            Int(buffer.format.sampleRate * duration)
+        )
+        guard framesToCopy > 0 else { return nil }
+
+        let tail = AVAudioPCMBuffer(
+            pcmFormat: buffer.format,
+            frameCapacity: AVAudioFrameCount(framesToCopy)
+        )!
+
+        if buffer.format.channelCount == 1 {
+            let srcStart = Int(buffer.frameLength) - framesToCopy
+            let srcBuffer = buffer.floatChannelData![0].advanced(by: srcStart)
+            let dstBuffer = tail.floatChannelData![0]
+            dstBuffer.update(from: srcBuffer, count: framesToCopy)
+        }
+
+        tail.frameLength = AVAudioFrameCount(framesToCopy)
+        return tail
     }
 }
