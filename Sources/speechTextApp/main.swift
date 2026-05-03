@@ -102,6 +102,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard !words.isEmpty else { continue }
 
             let overlap = overlapWordCount(existing: mergedWords, next: words)
+            if !mergedWords.isEmpty {
+                mergedWords.append("[]")
+            }
             mergedWords.append(contentsOf: words.dropFirst(overlap))
         }
 
