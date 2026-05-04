@@ -74,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
-            let transcript = mergeTranscripts(transcripts)
+            let transcript = TranscriptStitcher.merge(transcripts)
             guard !transcript.isEmpty else {
                 appState.state = .idle
                 updateStatusTitle()
@@ -92,45 +92,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             appState.state = .idle
             updateStatusTitle()
         }
-    }
-
-    func mergeTranscripts(_ transcripts: [String]) -> String {
-        var mergedWords: [String] = []
-
-        for transcript in transcripts {
-            let words = transcript.split(whereSeparator: { $0.isWhitespace }).map(String.init)
-            guard !words.isEmpty else { continue }
-
-            let overlap = overlapWordCount(existing: mergedWords, next: words)
-            if !mergedWords.isEmpty {
-                mergedWords.append("[]")
-            }
-            mergedWords.append(contentsOf: words.dropFirst(overlap))
-        }
-
-        return mergedWords.joined(separator: " ")
-    }
-
-    func overlapWordCount(existing: [String], next: [String]) -> Int {
-        let maxOverlap = min(15, existing.count, next.count)
-        guard maxOverlap > 0 else { return 0 }
-
-        for count in stride(from: maxOverlap, through: 1, by: -1) {
-            let suffix = existing.suffix(count).map(normalizedWord)
-            let prefix = next.prefix(count).map(normalizedWord)
-            if suffix == prefix {
-                return count
-            }
-        }
-
-        return 0
-    }
-
-    func normalizedWord(_ word: String) -> String {
-        let scalars = word.lowercased().unicodeScalars.filter {
-            CharacterSet.alphanumerics.contains($0)
-        }
-        return String(String.UnicodeScalarView(scalars))
     }
 
     func buildMenu() -> NSMenu {
