@@ -13582,6 +13582,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptCleaner.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptStitcher.swift"
         },
         {
@@ -13617,6 +13621,7 @@
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/GlobalKeyListenerService.swift.o",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TextInjectorService.swift.o",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.swift.o",
+        "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.swift.o",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptStitcher.swift.o",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/HistoryWindow.swift.o",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/main.swift.o"
@@ -13713,6 +13718,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptStitcher.swift.o"
         },
         {
@@ -13738,6 +13747,7 @@
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/GlobalKeyListenerService.swift",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TextInjectorService.swift",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriberService.swift",
+        "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptCleaner.swift",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptStitcher.swift",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Views/HistoryWindow.swift",
         "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/main.swift"
@@ -20022,6 +20032,7 @@
       "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/GlobalKeyListenerService.swift",
       "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TextInjectorService.swift",
       "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriberService.swift",
+      "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptCleaner.swift",
       "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptStitcher.swift",
       "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Views/HistoryWindow.swift",
       "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/main.swift",
@@ -25665,6 +25676,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptStitcher.swift.o"
         },
         {
@@ -25860,6 +25875,10 @@
         {
           "kind" : "file",
           "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriberService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptCleaner.swift"
         },
         {
           "kind" : "file",

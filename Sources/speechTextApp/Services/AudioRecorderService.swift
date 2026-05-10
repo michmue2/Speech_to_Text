@@ -1,14 +1,23 @@
 import Foundation
 import AVFoundation
-import AppKit
 
 struct AudioRecordingChunk {
     let index: Int
     let buffer: AVAudioPCMBuffer
 }
 
+struct AudioRecordingResult {
+    let fullBuffer: AVAudioPCMBuffer
+    let fallbackChunks: [AudioRecordingChunk]
+
+    var duration: TimeInterval {
+        Double(fullBuffer.frameLength) / fullBuffer.format.sampleRate
+    }
+}
+
 actor AudioRecorderService {
     private var audioEngine: AVAudioEngine?
+    private var fullRecordingBuffers: [AVAudioPCMBuffer] = []
     private var collectedBuffers: [AVAudioPCMBuffer] = []
     private var completedChunks: [AudioRecordingChunk] = []
     private var isRecording: Bool = false
@@ -22,6 +31,7 @@ actor AudioRecorderService {
     func start() async -> Bool {
         guard !isRecording else { return false }
         isRecording = true
+        fullRecordingBuffers.removeAll()
         collectedBuffers.removeAll()
         completedChunks.removeAll()
         nextChunkIndex = 0
@@ -82,13 +92,14 @@ actor AudioRecorderService {
 
     private func doCollect(_ buffer: AVAudioPCMBuffer) {
         guard isRecording else { return }
+        fullRecordingBuffers.append(buffer)
         collectedBuffers.append(buffer)
         framesSinceLastChunk += AVAudioFramePosition(buffer.frameLength)
     }
 
-    /// Stop recording and return all flushed chunks plus the final partial chunk.
-    func stop() async -> [AudioRecordingChunk] {
-        guard isRecording else { return [] }
+    /// Stop recording and return one canonical full buffer plus internal chunks for fallback transcription.
+    func stop() async -> AudioRecordingResult? {
+        guard isRecording else { return nil }
         isRecording = false
         chunkTimer?.cancel()
         chunkTimer = nil
@@ -102,11 +113,20 @@ actor AudioRecorderService {
             nextChunkIndex += 1
         }
 
+        guard let fullBuffer = combineBuffers(fullRecordingBuffers) else {
+            fullRecordingBuffers.removeAll()
+            collectedBuffers.removeAll()
+            completedChunks.removeAll()
+            framesSinceLastChunk = 0
+            return nil
+        }
+
         let chunks = completedChunks
+        fullRecordingBuffers.removeAll()
         collectedBuffers.removeAll()
         completedChunks.removeAll()
         framesSinceLastChunk = 0
-        return chunks
+        return AudioRecordingResult(fullBuffer: fullBuffer, fallbackChunks: chunks)
     }
 
     private func scheduleChunkTimer() {
@@ -135,10 +155,6 @@ actor AudioRecorderService {
             collectedBuffers.removeAll()
         }
         framesSinceLastChunk = 0
-
-        DispatchQueue.main.async {
-            NSSound.beep()
-        }
     }
 
     /// Combine multiple PCM buffers into a single buffer

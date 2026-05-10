@@ -40,4 +40,6 @@ A menu-bar macOS app that lets you dictate text anywhere by holding the right **
 - **TranscriberService** — WhisperKit for local speech-to-text
 - **TextInjectorService** — NSPasteboard + CGEvent Cmd+V for text insertion
 
+For recordings up to 4 minutes, SpeechText transcribes one full WAV file first to avoid app-level chunk boundary duplicates. While recording, it also keeps quiet 30-second fallback chunks. If the full-file transcription is empty or suspiciously short, the app retries with those chunks and stitches the results.
+
 All processing runs locally on-device. No network calls required.

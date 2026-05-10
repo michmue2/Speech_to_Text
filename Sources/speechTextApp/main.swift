@@ -1,5 +1,6 @@
 import ApplicationServices
 import AppKit
+import AVFoundation
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
@@ -11,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var historyWindow: HistoryWindow?
     var selectedModel: SpeechTextModel = .saved
     let textInjector = TextInjectorService()
+    let singleFileTranscriptionLimit: TimeInterval = 4 * 60
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         appState = AppState()
@@ -53,28 +55,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard appState.state == .recording else { return }
         appState.state = .processing
         updateStatusTitle()
-        let chunks = await audioRecorder.stop()
-        guard !chunks.isEmpty else {
+        guard let recording = await audioRecorder.stop() else {
             appState.state = .idle
             updateStatusTitle()
             return
         }
 
         do {
-            var transcripts: [String] = []
-
-            for chunk in chunks.sorted(by: { $0.index < $1.index }) {
-                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("speechtext_recording_\(UUID().uuidString)_\(chunk.index).wav")
-                defer { try? FileManager.default.removeItem(at: tempURL) }
-                try AudioRecorderService.writeBufferToWAV(chunk.buffer, to: tempURL)
-                let transcript = await transcriber.transcribeFile(path: tempURL.path)
-
-                if let transcript, !transcript.isEmpty {
-                    transcripts.append(transcript)
-                }
-            }
-
-            let transcript = TranscriptStitcher.merge(transcripts)
+            let transcript = TranscriptCleaner.clean(try await transcribeRecording(recording))
             guard !transcript.isEmpty else {
                 appState.state = .idle
                 updateStatusTitle()
@@ -92,6 +80,71 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             appState.state = .idle
             updateStatusTitle()
         }
+    }
+
+    private func transcribeRecording(_ recording: AudioRecordingResult) async throws -> String {
+        var singleFileCandidate: String?
+
+        if recording.duration <= singleFileTranscriptionLimit {
+            let transcript = try await transcribeBuffer(recording.fullBuffer, fileLabel: "full")
+            if isUsableSingleFileTranscript(transcript, duration: recording.duration) {
+                return transcript?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            }
+
+            singleFileCandidate = transcript?.trimmingCharacters(in: .whitespacesAndNewlines)
+            NSLog("[App] Single-file transcription was empty or suspiciously short. Falling back to chunk transcription.")
+        } else {
+            NSLog("[App] Recording is longer than \(Int(singleFileTranscriptionLimit))s. Using chunk fallback.")
+        }
+
+        let fallbackTranscript = try await transcribeChunks(recording.fallbackChunks)
+        if !fallbackTranscript.isEmpty {
+            return fallbackTranscript
+        }
+
+        return singleFileCandidate ?? ""
+    }
+
+    private func transcribeBuffer(_ buffer: AVAudioPCMBuffer, fileLabel: String) async throws -> String? {
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("speechtext_recording_\(UUID().uuidString)_\(fileLabel).wav")
+        defer { try? FileManager.default.removeItem(at: tempURL) }
+
+        try AudioRecorderService.writeBufferToWAV(buffer, to: tempURL)
+        return await transcriber.transcribeFile(path: tempURL.path)
+    }
+
+    private func transcribeChunks(_ chunks: [AudioRecordingChunk]) async throws -> String {
+        var transcripts: [String] = []
+
+        for chunk in chunks.sorted(by: { $0.index < $1.index }) {
+            let transcript = try await transcribeBuffer(chunk.buffer, fileLabel: "chunk_\(chunk.index)")
+            if let transcript, !transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                transcripts.append(transcript)
+            }
+        }
+
+        return TranscriptStitcher.merge(transcripts)
+    }
+
+    private func isUsableSingleFileTranscript(_ transcript: String?, duration: TimeInterval) -> Bool {
+        guard let transcript = transcript?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !transcript.isEmpty
+        else {
+            return false
+        }
+
+        if duration >= 60 {
+            return wordCount(in: transcript) > 2
+        }
+
+        return true
+    }
+
+    private func wordCount(in text: String) -> Int {
+        text.split { character in
+            !character.isLetter && !character.isNumber && character != "'" && character != "’"
+        }.count
     }
 
     func buildMenu() -> NSMenu {

@@ -7,6 +7,18 @@ struct TranscriptStitcher {
         let range: Range<String.Index>
     }
 
+    private struct IndexedWordToken {
+        let wordIndex: Int
+        let token: WordToken
+    }
+
+    private struct OverlapMatch {
+        let wordsToDrop: Int
+        let matchedWords: Int
+        let existingEndGap: Int
+        let nextStartGap: Int
+    }
+
     private static let wordPattern = try! NSRegularExpression(
         pattern: "[\\p{L}\\p{N}]+(?:['’][\\p{L}\\p{N}]+)?",
         options: []
@@ -17,6 +29,11 @@ struct TranscriptStitcher {
         "from", "i", "in", "is", "it", "of", "on", "or", "so", "that",
         "the", "this", "to", "was", "we", "with", "you"
     ]
+
+    private static let ignoredAlignmentWords: Set<String> = weakSingleWordOverlaps.union([
+        "he", "she", "they", "them", "then", "there", "here", "if", "into",
+        "its", "it's", "just", "not", "now", "than", "their", "these", "those"
+    ])
 
     static func merge(_ transcripts: [String]) -> String {
         var merged = ""
@@ -30,7 +47,7 @@ struct TranscriptStitcher {
                 continue
             }
 
-            let overlap = overlapWordCount(existing: merged, next: next)
+            let overlap = wordsToDropForOverlap(existing: merged, next: next)
             let remainder = remainderAfterDropping(overlapWords: overlap, from: next)
             merged = smartJoin(merged, remainder)
         }
@@ -45,9 +62,15 @@ struct TranscriptStitcher {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func overlapWordCount(existing: String, next: String) -> Int {
+    private static func wordsToDropForOverlap(existing: String, next: String) -> Int {
         let existingWords = wordTokens(in: existing)
         let nextWords = wordTokens(in: next)
+        let exactOverlap = exactPrefixSuffixOverlap(existingWords: existingWords, nextWords: nextWords)
+        let fuzzyOverlap = fuzzyEdgeOverlap(existingWords: existingWords, nextWords: nextWords)?.wordsToDrop ?? 0
+        return max(exactOverlap, fuzzyOverlap)
+    }
+
+    private static func exactPrefixSuffixOverlap(existingWords: [WordToken], nextWords: [WordToken]) -> Int {
         let maxOverlap = min(40, existingWords.count, nextWords.count)
         guard maxOverlap > 0 else { return 0 }
 
@@ -61,6 +84,85 @@ struct TranscriptStitcher {
         }
 
         return 0
+    }
+
+    private static func fuzzyEdgeOverlap(existingWords: [WordToken], nextWords: [WordToken]) -> OverlapMatch? {
+        guard existingWords.count >= 6, nextWords.count >= 4 else { return nil }
+
+        let existingEdgeWordStart = max(0, existingWords.count - 90)
+        let nextEdgeWordEnd = min(nextWords.count - 1, 90)
+        let existingContent = indexedContentWords(existingWords).filter { $0.wordIndex >= existingEdgeWordStart }
+        let nextContent = indexedContentWords(nextWords).filter { $0.wordIndex <= nextEdgeWordEnd }
+        guard !existingContent.isEmpty, !nextContent.isEmpty else { return nil }
+
+        var bestMatch: OverlapMatch?
+
+        for existingStart in existingContent.indices {
+            for nextStart in nextContent.indices {
+                let nextStartGap = nextContent[nextStart].wordIndex
+                guard nextStartGap <= 8 else { break }
+
+                var matchedWords = 0
+                var existingCursor = existingStart
+                var nextCursor = nextStart
+
+                while existingCursor < existingContent.count,
+                      nextCursor < nextContent.count,
+                      wordsAreSimilar(
+                        existingContent[existingCursor].token.normalized,
+                        nextContent[nextCursor].token.normalized
+                      ) {
+                    matchedWords += 1
+                    existingCursor += 1
+                    nextCursor += 1
+                }
+
+                guard matchedWords >= 4 else { continue }
+
+                let existingEndWordIndex = existingContent[existingCursor - 1].wordIndex
+                let nextEndWordIndex = nextContent[nextCursor - 1].wordIndex
+                let existingEndGap = existingWords.count - 1 - existingEndWordIndex
+                guard existingEndGap <= 8 else { continue }
+
+                let candidate = OverlapMatch(
+                    wordsToDrop: nextEndWordIndex + 1,
+                    matchedWords: matchedWords,
+                    existingEndGap: existingEndGap,
+                    nextStartGap: nextStartGap
+                )
+
+                if isBetterOverlap(candidate, than: bestMatch) {
+                    bestMatch = candidate
+                }
+            }
+        }
+
+        return bestMatch
+    }
+
+    private static func indexedContentWords(_ words: [WordToken]) -> [IndexedWordToken] {
+        words.enumerated().compactMap { index, token in
+            guard !ignoredAlignmentWords.contains(token.normalized) else { return nil }
+            return IndexedWordToken(wordIndex: index, token: token)
+        }
+    }
+
+    private static func isBetterOverlap(_ candidate: OverlapMatch, than current: OverlapMatch?) -> Bool {
+        guard let current else { return true }
+
+        if candidate.wordsToDrop != current.wordsToDrop {
+            return candidate.wordsToDrop > current.wordsToDrop
+        }
+
+        if candidate.matchedWords != current.matchedWords {
+            return candidate.matchedWords > current.matchedWords
+        }
+
+        if candidate.existingEndGap != current.existingEndGap {
+            return candidate.existingEndGap < current.existingEndGap
+        }
+
+        return candidate.nextStartGap < current.nextStartGap
     }
 
     private static func acceptsOverlap(existing: [WordToken], next: [WordToken]) -> Bool {

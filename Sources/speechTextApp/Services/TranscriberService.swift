@@ -66,7 +66,9 @@ actor TranscriberService {
         do {
             let options = DecodingOptions(language: "en", detectLanguage: false)
             let result = try await whisperKit.transcribe(audioPath: path, decodeOptions: options, callback: nil)
-            return result.first?.text
+            let transcript = result.map(\.text).joined(separator: " ")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return transcript.isEmpty ? nil : transcript
         } catch {
             print("[TranscriberService] Transcription failed: \(error)")
             return nil

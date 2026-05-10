@@ -58,6 +58,13 @@
     "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.swiftdeps",
     "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriberService.dia"
   },
+  "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptCleaner.swift": {
+    "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.d",
+    "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.swift.o",
+    "swiftmodule": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner~partial.swiftmodule",
+    "swift-dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.swiftdeps",
+    "diagnostics": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptCleaner.dia"
+  },
   "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/Sources/speechTextApp/Services/TranscriptStitcher.swift": {
     "dependencies": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptStitcher.d",
     "object": "/Users/Michael_1/Desktop/voice_to_text_local/Speech_to_Text/.build/arm64-apple-macosx/debug/SpeechTextApp.build/TranscriptStitcher.swift.o",
